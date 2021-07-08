@@ -1,32 +1,32 @@
-var mysql = require('mysql');
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Fullsnatch2207',
-    database: 'fullsnackdb',
-    dateStrings: true,
-    multipleStatements: true
+// var mysql = require('mysql');
+// var connection = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: 'Fullsnatch2207',
+//     database: 'fullsnackdb',
+//     dateStrings: true,
+//     multipleStatements: true
 
-});
+// });
 
-connection.connect(function (err) {
-    if (err) {
-        console.error('error connecting: ' + err.stack);
-        return;
-    }
+// connection.connect(function (err) {
+//     if (err) {
+//         console.error('error connecting: ' + err.stack);
+//         return;
+//     }
 
-    console.log('connected as id ' + connection.threadId);
-});
+//     console.log('connected as id ' + connection.threadId);
+// });
 
 
-function sqlPromise(sqlQuery) {
-    return new Promise((resolve, reject) => {
-        connection.query(sqlQuery, (err, result) => {
-            if (err) reject(err);
-            resolve(result)
-        })
-    })
-}
+// function sqlPromise(sqlQuery) {
+//     return new Promise((resolve, reject) => {
+//         connection.query(sqlQuery, (err, result) => {
+//             if (err) reject(err);
+//             resolve(result)
+//         })
+//     })
+// }
 
 const api = () => {
 

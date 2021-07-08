@@ -1,11 +1,10 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/api');
-
-//MULTER EXAMPLE
+const db = require('../config/database');
+const User = require('../models/users')
 
 const multer = require('multer')
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, `public/images/`)
@@ -14,14 +13,17 @@ const storage = multer.diskStorage({
     cb(null, `${file.fieldname}-${Date.now()}.${file.mimetype === 'image/jpeg' ? 'jpg' : 'png'}`)
   }
 })
-
 const upload = multer({ storage: storage })
 const cpUpload = upload.single('profileImg')
 
+
 // getting users data
 router.get('/:userId', async function (req, res, next) {
-  const usersData = await api.getUserData(req.params.userId)
-  res.send(usersData);
+  User.findByPk(req.params.userId)
+    .then(users => console.log(users))
+    .catch(err => console.log(err))
+  // const usersData = await api.getUserData(req.params.userId)
+  // res.send(usersData);
 });
 
 // updating users data
