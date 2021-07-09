@@ -12,7 +12,7 @@ const Gender = db.define('gender', {
     allowNull: false
   }
 }, {
-  sequelize,
+  db,
   tableName: 'gender',
   timestamps: false,
   indexes: [

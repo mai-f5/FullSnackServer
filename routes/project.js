@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/api');
-
+const { Project, ProjectPicture, ProjectTech, } = require('../models/associations');
 /* GET projects listings. */
 router.get('/:projectId', async function (req, res, next) {
     const projectPics = await api.getProjectsAllPics(req.params.pid)
