@@ -1,12 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/api');
-const sequelize = require('../config/database')
-const { Op } = require("sequelize");
-/* GET explore page listing. */
-const { Project, ProjectPicture, RequiredTech, DifficultyLevel, User, UserLike, ProjectTech } = require('../models/associations');
 
-
+// GET
 router.get('/', async function (req, res, next) {
     try {
         const projectsData = await api.getProjectsCardData(req.query)
@@ -45,10 +41,45 @@ router.get('/', async function (req, res, next) {
     }
 });
 
+router.get('/:projectId', async function (req, res, next) {
+    // const projectPics = await api.getProjectsAllPics(req.params.pid)
+    // const projectThreads = await api.getProjectsThreads(req.params.pid)
+    // const threadsComments = await api.getThreadComments(projectThreads.map(thread => thread.id))
+    res.send('REST OF PROJECT DATA - will bring forum if not editing');
+});
+
+//PUT
+router.put('/:projectId', function (req, res, next) {
+    res.send('UPDATED PROJECT DATA');
+});
+
+router.put('/:projectId/remove', function (req, res, next) {
+    res.send('HIDE PROJECT');
+});
 
 
-// router.get('/search=:keywords&reqtechs=:reqTechsIds&difflvls=:difficultyLvlsIds&assets=:assetsIds&sortby=:sortBy&amount=:amount&currentPage=:currPage&user=:userId', async function (req, res, next) {
-//     const projectsData = await api.getProjectsRowData(req.params)
-// })
+//POST
+
+router.post('/', function (req, res, next) {
+    res.send('ADD PROJECT - Data in body');
+});
+
+router.post('/:projectid/newthread', function (req, res, next) {
+    res.send('ADD THREAD');
+});
+
+router.post('/:threadid/newcomment', function (req, res, next) {
+    res.send('ADD COMMENT');
+});
+
+//DELETE
+
+router.delete('/:pId/picture/:picId', function (req, res, next) {
+    res.send('REMOVE IMAGE');
+});
+
+router.delete('/:userId/projects/:projectId/remove/requiredTech/:reqtechid', function (req, res, next) {
+    res.send('REMOVE PROJECT\'S REQUIRED TECH ');
+});
 
 module.exports = router;
