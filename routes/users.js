@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const api = require('../DAL/api');
 const db = require('../config/database');
-const { User, Gender, Occupation } = require('../models/associations');
+const { User } = require('../models/associations');
 
 const multer = require('multer')
 const storage = multer.diskStorage({
@@ -26,11 +26,20 @@ router.get('/:userId', async function (req, res, next) {
 
 // updating users data
 router.put('/:userId', cpUpload, async function (req, res, next) {
+  try {
+    const userUpdateRes = await User.update(
+      { profile_img: `images/${req.file.filename}` },
+      { where: { id: req.params.userId } })
+    res.send(userUpdateRes)
+  }
+  catch (err) {
+    console.log(err)
+  }
   // console.log('this is the file', req.file) 
   // console.log('these are the texts', req.params)
 
-  const userUpdateRes = await api.updateUserData({ ...req.params, profileImg: `images/${req.file.filename}` })
-  res.send(userUpdateRes)
+  // const userUpdateRes = await api.updateUserData({ ...req.params, profileImg: `images/${req.file.filename}` })
+
 });
 
 

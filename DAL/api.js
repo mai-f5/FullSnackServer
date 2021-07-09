@@ -1,3 +1,5 @@
+const sequelize = require('../config/database')
+const { RequiredTech, NotificationType, Gender, Occupation, DifficultyLevel, User, Project, Thread, Comment, Notification, ProjectPicture, ProjectTech, UserLike } = require('../models/associations');
 // var mysql = require('mysql');
 // var connection = mysql.createConnection({
 //     host: 'localhost',
@@ -80,31 +82,89 @@ where id = ${updatedUserData.userId}`
     }
 
     //---------------------------projects cards---------------------------------//
-    const getProjectsCardData = (formData) => {
+    const getProjectsCardData = async formData => {
+        // //// POST SEQUELIZE - NOT DONE
 
-        let projectsDataQuery = `select p.id, p.user_id, p.name, p.assets_src, count(ulp.liked_project_id) likesCounter, dl.name difficultyLvlName, prt.reqTechsNames
-        from projects p join users_liked_projects ulp on  p.id = ulp.liked_project_id
-        join difficulty_levels dl on p.difficulty_level_id = dl.id
-        join(select pt.project_id, group_concat(rt.id) techs_ids, group_concat(rt.name separator ', ') reqTechsNames
-				from required_techs rt join project_tech pt on pt.tech_id = rt.id
-				group by pt.project_id) prt
-        on prt.project_id = p.id
-        where p.is_visible = 1`;
+        let whereClause = {};
 
-        if (!formData.pid) {
-            projectsDataQuery += `
-         ${formData.search !== '' ? `and p.name like '%${formData.search}%'` : ''}         
-         ${formData.difflvls ? `and p.difficulty_level_id in (${formData.difflvls})` : ''}
-         ${formData.reqtechs ? `and prt.techs_ids REGEXP '[${formData.reqtechs.split(',').join('')}]'` : ''}
-         ${!formData.assets || (formData.assets.includes(1) && formData.assets.includes(0)) ? '' : formData.assets === '0' ? 'and p.assets_src is null' : 'and p.assets_src is not null'}         
-        ${formData.user !== '' ? `and p.user_id = ${formData.user}` : ''}
-         group by p.id order by ${formData.sortby === 'likes' ? 'count(ulp.liked_project_id) desc' : 'p.timestamp desc'} limit ${(formData.currentpage - 1) * formData.amount}, ${formData.amount} `;
+        // let wantedOrder = req.query.sortby === 'likes' ? [[sequelize.col('likesCounter'), 'DESC']] : ['timestamp', 'DESC'];
 
-        } else {
-
-            projectsDataQuery += ` and p.id = ${formData.pid}`
+        if (formData.search) {
+            whereClause.name = { [Op.like]: `%${formData.search}%` }
         }
-        return sqlPromise(projectsDataQuery)
+        if (formData.difflvls) {
+            whereClause.difficulty_level_id = formData.difflvls.split(',')
+        }
+        // if (req.query.reqtechs) {
+        //     whereClause['$project_required_tech_id.tech_id$'] = req.query.reqtechs.split(',')
+
+        // }
+        if (formData.user) {
+            whereClause.user_id = formData.user
+        }
+
+        const projectsData = await Project.findAll(
+            {
+                attributes: ['id', 'name', 'assets_src', 'user_id', 'timestamp',
+                ],
+                where: whereClause,
+                include: [
+                    {
+                        model: ProjectPicture,
+                        as: 'projects_pictures',
+                        attributes: ['pic_src'],
+                        limit: 1
+                    },
+                    {
+                        model: RequiredTech,
+                        as: 'project_required_tech_id',
+                        attributes: ['id', 'name'],
+
+                    },
+
+                    {
+                        model: DifficultyLevel,
+                        as: 'difficulty_level',
+                        attributes: ['name']
+                    },
+                    {
+                        model: UserLike,
+                        as: 'liked_project_id',
+                    }
+                ],
+                // order: [[sequelize.fn('COUNT', sequelize.col('liked_project_id')), 'liked_project_id'], 'DESC'],
+                offset: 0, limit: 20
+                // offset: (req.query.currentpage - 1) * req.query.amount,
+                // limit: req.query.amount
+            })
+
+
+
+        // ///////PRE SEQUELIZE
+        // let projectsDataQuery = `select p.id, p.user_id, p.name, p.assets_src, count(ulp.liked_project_id) likesCounter, dl.name difficultyLvlName, prt.reqTechsNames
+        // from projects p join users_liked_projects ulp on  p.id = ulp.liked_project_id
+        // join difficulty_levels dl on p.difficulty_level_id = dl.id
+        // join(select pt.project_id, group_concat(rt.id) techs_ids, group_concat(rt.name separator ', ') reqTechsNames
+        // 		from required_techs rt join project_tech pt on pt.tech_id = rt.id
+        // 		group by pt.project_id) prt
+        // on prt.project_id = p.id
+        // where p.is_visible = 1`;
+
+        // if (!formData.pid) {
+        //     projectsDataQuery += `
+        //  ${formData.search !== '' ? `and p.name like '%${formData.search}%'` : ''}         
+        //  ${formData.difflvls ? `and p.difficulty_level_id in (${formData.difflvls})` : ''}
+        //  ${formData.reqtechs ? `and prt.techs_ids REGEXP '[${formData.reqtechs.split(',').join('')}]'` : ''}
+        //  ${!formData.assets || (formData.assets.includes(1) && formData.assets.includes(0)) ? '' : formData.assets === '0' ? 'and p.assets_src is null' : 'and p.assets_src is not null'}         
+        // ${formData.user !== '' ? `and p.user_id = ${formData.user}` : ''}
+        //  group by p.id order by ${formData.sortby === 'likes' ? 'count(ulp.liked_project_id) desc' : 'p.timestamp desc'} limit ${(formData.currentpage - 1) * formData.amount}, ${formData.amount} `;
+
+        // } else {
+
+        //     projectsDataQuery += ` and p.id = ${formData.pid}`
+        // }
+        // return sqlPromise(projectsDataQuery)
+        return projectsData;
     }
 
     // const getProjectsReqTechs = projectIdList => {
