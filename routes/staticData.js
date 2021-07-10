@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const api = require('../DAL/api');
+const api = require('../DAL/staticData');
 
 
 router.get('/requiredtechs', async function (req, res, next) {
