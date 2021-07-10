@@ -46,7 +46,7 @@ router.put('/:userId/password', async function (req, res, next) {
 
 
 //POST
-router.post('/signup', function (req, res, next) {
+router.post('/', function (req, res, next) {
   //validations
   try {
     const newUserId = api.addNewUser(req.body)
@@ -60,7 +60,7 @@ router.post('/login', async function (req, res, next) {
   try {
     const userLoginRes = await api.login(req.body)
     if (!userLoginRes) {
-      res.status(500).send('Incorrect Username or Password')
+      res.status(500).send('Incorrect Username/Password')
     }
     else {
       res.send(userLoginRes)
@@ -68,6 +68,7 @@ router.post('/login', async function (req, res, next) {
   }
   catch (err) {
     console.log(err)
+    res.status(500).send('Incorrect Username/Password')
   }
 
 });
