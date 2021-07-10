@@ -15,7 +15,7 @@ router.get('/notifications/:userId', async function (req, res, next) {
 });
 
 //PUT
-router.put('/notifications/:uid', async function (req, res, next) {
+router.put('/notifications/:userId', async function (req, res, next) {
     const updateNotifs = await api.updateNotificationsAsRead(req.params.userId)
     res.send(JSON.stringify(updateNotifs));
 });
