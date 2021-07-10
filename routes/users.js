@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const api = require('../DAL/api');
-const db = require('../config/database');
-const { User } = require('../models/associations');
+const api = require('../DAL/users');
 const multer = require('multer')
 
 const storage = multer.diskStorage({
@@ -20,41 +18,58 @@ const cpUpload = upload.single('profileImg')
 
 // GET
 router.get('/:userId', async function (req, res, next) {
-  const usersData = await User.findByPk(req.params.userId, { include: ['gender', 'occupation'] })
+  const usersData = await api.getUserData(req.params.userId)
   // const usersData = await api.getUserData(req.params.userId)
   res.send(usersData);
 });
 
 // PUT
-router.put('/:userId', cpUpload, async function (req, res, next) {
+router.put('/:user_id', cpUpload, async function (req, res, next) {
   try {
-    const userUpdateRes = await User.update(
-      { profile_img: `images/${req.file.filename}` },
-      { where: { id: req.params.userId } })
+    const userUpdateRes = await api.updateUserData({ ...req.params, profile_img: `images/${req.file.filename}` })
     res.send(userUpdateRes)
   }
   catch (err) {
     console.log(err)
   }
-  // console.log('this is the file', req.file) 
-  // console.log('these are the texts', req.params)
+});
 
-  // const userUpdateRes = await api.updateUserData({ ...req.params, profileImg: `images/${req.file.filename}` })
+router.put('/:userId/password', async function (req, res, next) {
+  try {
+    const userPassUpdate = await api.updateUserPassword(req.body)
+    res.send(userPassUpdate);
+  } catch (err) {
+    console.log(err)
+  }
 
 });
 
-router.put('/:userId/password', function (req, res, next) {
-  res.send('UPDATE USER\'S PASSWORD');
-});
 
-
-/* POST USER */
+//POST
 router.post('/signup', function (req, res, next) {
-  res.send('ADD USER');
+  //validations
+  try {
+    const newUserId = api.addNewUser(req.body)
+    res.send(newUserId)
+  } catch (err) {
+    console.log(err)
+  }
 });
 
-router.post('/login', function (req, res, next) {
-  res.send('LOGIN USER');
+router.post('/login', async function (req, res, next) {
+  try {
+    const userLoginRes = await api.login(req.body)
+    if (!userLoginRes) {
+      res.status(500).send('Incorrect Username or Password')
+    }
+    else {
+      res.send(userLoginRes)
+    }
+  }
+  catch (err) {
+    console.log(err)
+  }
+
 });
 
 module.exports = router;
