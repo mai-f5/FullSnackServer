@@ -5,7 +5,7 @@ const { NotificationType, User, Project, Notification, UserLike } = require('../
 
 //GET
 const getUsersNewNotifications = async userId => {
-    return await Notification.findAndCountAll({
+    return await Notification.findAll({
         where: { notified_user_id: userId, is_read: 0 },
         include: [
             {

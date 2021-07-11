@@ -4,9 +4,11 @@ const api = require('../DAL/forum');
 
 //GET
 router.get('/:projectId', async function (req, res, next) {
+
     try {
         const projectsThreadsComments = await api.getProjectsThreadsComments(req.params.projectId)
-        res.send(projectsThreadsComments)
+        console.log('in route: ', projectsThreadsComments)
+        res.send(JSON.stringify(projectsThreadsComments))
     } catch (err) {
         console.log(err)
     }
