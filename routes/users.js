@@ -12,7 +12,7 @@ router.get('/:userId', validateCookie, async function (req, res, next) {
 });
 
 // PUT
-router.put('/:user_id', cpUpload, validateCookie, async function (req, res, next) {
+router.put('/:userId', cpUpload, validateCookie, async function (req, res, next) {
   try {
     const userUpdateRes = await api.updateUserData({ ...req.params, profile_img: `images/${req.file.filename}` })
     res.send(userUpdateRes)
@@ -37,12 +37,11 @@ router.put('/:userId/password', validateCookie, async function (req, res, next) 
 router.post('/', async function (req, res, next) {
   //validations
   try {
-
     const { username, password, email } = req.body
     const hashedPassword = await bcrypt.hash(password, saltRounds)
-    console.log(hashedPassword)
-    const newUserId = api.addNewUser({ username, email, password: hashedPassword })
+    const newUserId = await api.addNewUser({ username, email, password: hashedPassword })
     res.send(newUserId)
+
   } catch (err) {
     console.log(err)
   }
@@ -56,7 +55,9 @@ router.post('/login', async function (req, res, next) {
     const match = await bcrypt.compare(password, user.password);
 
     if (match) {
-      res.cookie('fsCookie', 'logged_in', { httpOnly: true })
+
+      const hashedUserId = await bcrypt.hash(JSON.stringify(user.dataValues.id), saltRounds);
+      res.cookie('fsCookie', hashedUserId, { httpOnly: true })
 
       const privateUser = { ...user.dataValues, password: '' }
       res.send(privateUser)
