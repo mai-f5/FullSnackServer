@@ -1,4 +1,5 @@
-
+const bcrypt = require('bcrypt')
+const saltRounds = 10;
 //MULTER
 const multer = require('multer')
 
@@ -15,11 +16,12 @@ const upload = multer({ storage: storage })
 const cpUpload = upload.single('profileImg')
 
 //COOKIES
-function validateCookie(req, res, next) {
+async function validateCookie(req, res, next) {
     const cookies = req.cookies;
+    const currentUserId = req.params.userId || req.query.userId || req.body.userId;
     if ('fsCookie' in cookies) {
-        if (cookies.fsCookie === 'logged_in') next();
-
+        const match = await bcrypt.compare(currentUserId, cookies.fsCookie);
+        if (match) next()
         else {
             res.status(403).send({ msg: 'Not logged in' })
         }
