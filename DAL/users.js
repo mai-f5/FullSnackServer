@@ -40,19 +40,10 @@ const updateUserPassword = async updatedUserData => {
     }
 }
 
-
 //POST
-// const login = async loginData => {
-//     try {
-//         return await User.findOne({attributes: {exclude:['password']} where: { username: loginData.username, password: loginData.password } })
-//     } catch (err) {
-//         console.log(err)
-//     }
-// }
-
 const login = async username => {
     try {
-        return await User.findOne({ attributes: ['id', 'password'], where: { username: username } })
+        return await User.findOne({ where: { username: username } })
     } catch (err) {
         console.log(err)
     }
