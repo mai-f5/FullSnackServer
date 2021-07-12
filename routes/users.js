@@ -70,8 +70,14 @@ router.post('/login', async function (req, res, next) {
 });
 
 
-router.delete('/logout', validateCookie, async function (req, res, next) {
-  response.clearCookie('fsCookie')
+router.delete('/logout', async function (req, res, next) {
+  try {
+    res.clearCookie('fsCookie', { maxAge: Date.now() })
+    res.send('logged out')
+
+  } catch (err) {
+    console.log(err)
+  }
 });
 
 module.exports = router;
