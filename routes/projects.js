@@ -6,7 +6,7 @@ const { validateCookie, cpUpload } = require('../utils/middlewares')
 // GET
 router.get('/', async function (req, res, next) {
     try {
-        if (req.query.userId) req.query.userId = ''
+        if (req.query.user) req.query.user = ''
         console.log(req.query)
         const projectsData = await api.getProjectsCardData(req.query)
         res.send(projectsData)

@@ -18,7 +18,7 @@ const getProjectsCardData = async formData => {
         //     whereClause['$project_required_tech_id.tech_id$'] = req.query.reqtechs.split(',')
         // }
         if (formData.user) {
-            whereClause.user_id = formData.userId
+            whereClause.user_id = formData.user
         }
 
         const projectsCardsData = await Project.findAll(
