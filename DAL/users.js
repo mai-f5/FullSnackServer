@@ -51,10 +51,10 @@ const login = async username => {
 
 const addNewUser = async usersData => {
     try {
-        return await User.create({ ...usersData })
-
+        const newUser = await User.create({ ...usersData })
+        delete newUser.dataValues['password']
+        return newUser
     } catch (err) {
-
         console.log(err)
     }
 }
