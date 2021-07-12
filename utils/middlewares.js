@@ -20,8 +20,9 @@ async function validateCookie(req, res, next) {
     const cookies = req.cookies;
     const currentUserId = req.params.userId || req.query.userId || req.body.userId;
     if ('fsCookie' in cookies) {
-        const match = await bcrypt.compare(currentUserId, cookies.fsCookie);
-        if (match) next()
+        if (cookies.fsCookie === currentUserId) next();
+        // const match = await bcrypt.compare(currentUserId, cookies.fsCookie);
+        // if (match) next()
         else {
             res.status(403).send({ msg: 'Not logged in' })
         }

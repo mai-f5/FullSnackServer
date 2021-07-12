@@ -52,7 +52,7 @@ const updateUserPassword = async updatedUserData => {
 
 const login = async username => {
     try {
-        return await User.findOne({ where: { username: username } })
+        return await User.findOne({ attributes: ['id', 'password'], where: { username: username } })
     } catch (err) {
         console.log(err)
     }

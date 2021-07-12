@@ -56,8 +56,8 @@ router.post('/login', async function (req, res, next) {
 
     if (match) {
 
-      const hashedUserId = await bcrypt.hash(JSON.stringify(user.dataValues.id), saltRounds);
-      res.cookie('fsCookie', hashedUserId, { httpOnly: true })
+      // const hashedUserId = await bcrypt.hash(JSON.stringify(user.dataValues.id), saltRounds);
+      res.cookie('fsCookie', JSON.stringify(user.id), { httpOnly: true })
 
       const privateUser = { ...user.dataValues, password: '' }
       res.send(privateUser)
@@ -70,8 +70,14 @@ router.post('/login', async function (req, res, next) {
 });
 
 
-router.delete('/logout', validateCookie, async function (req, res, next) {
-  response.clearCookie('fsCookie')
+router.delete('/logout', async function (req, res, next) {
+  try {
+    res.clearCookie('fsCookie', { maxAge: Date.now() })
+    res.send('logged out')
+
+  } catch (err) {
+    console.log(err)
+  }
 });
 
 module.exports = router;
