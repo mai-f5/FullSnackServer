@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/events');
+const { validateCookie } = require('../utils/middlewares')
 
 // NOTIFICATIONS
 
 //GET
-router.get('/notifications/:userId', async function (req, res, next) {
+router.get('/notifications/:userId', validateCookie, async function (req, res, next) {
     try {
         const newNotifs = await api.getUsersNewNotifications(req.params.userId)
         res.send(JSON.stringify(newNotifs));
@@ -15,7 +16,7 @@ router.get('/notifications/:userId', async function (req, res, next) {
 });
 
 //PUT
-router.put('/notifications/:userId', async function (req, res, next) {
+router.put('/notifications/:userId', validateCookie, async function (req, res, next) {
     const updateNotifs = await api.updateNotificationsAsRead(req.params.userId)
     res.send(JSON.stringify(updateNotifs));
 });
@@ -36,7 +37,7 @@ router.post('/notifications', async function (req, res, next) {
 //LIKES
 
 //GET
-router.get('/likes/:userId/:projectId', async function (req, res, next) {
+router.get('/likes/:userId/:projectId', validateCookie, async function (req, res, next) {
     try {
         const didUserLike = await api.getDidUserLikeProject(req.params.userId, req.params.projectId)
         res.send(JSON.stringify(didUserLike))
@@ -46,7 +47,7 @@ router.get('/likes/:userId/:projectId', async function (req, res, next) {
 });
 
 //POST
-router.post('/likes', async function (req, res, next) {
+router.post('/likes', validateCookie, async function (req, res, next) {
     try {
         const addLikeRes = await api.addNewLike(req.body)
         res.send(JSON.stringify(addLikeRes))

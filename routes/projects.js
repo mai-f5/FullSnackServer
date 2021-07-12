@@ -1,14 +1,26 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/projects');
+const { validateCookie, cpUpload } = require('../utils/middlewares')
 
 // GET
 router.get('/', async function (req, res, next) {
     try {
+        if (req.query.user) req.query.user = ''
+        console.log(req.query)
         const projectsData = await api.getProjectsCardData(req.query)
         res.send(projectsData)
     } catch (err) {
-        console.log(err)
+        console.log(err, 'error')
+    }
+});
+
+router.get('/dashboard', validateCookie, async function (req, res, next) {
+    try {
+        const projectsData = await api.getProjectsCardData(req.query)
+        res.send(projectsData)
+    } catch (err) {
+        console.log(err, 'error')
     }
 });
 
@@ -22,7 +34,7 @@ router.get('/:projectId', async function (req, res, next) {
 });
 
 //PUT
-router.put('/', async function (req, res, next) {
+router.put('/', validateCookie, async function (req, res, next) {
     try {
         const updateProjectRes = api.updateProjectData(req.body)
         res.send(updateProjectRes)
@@ -31,7 +43,7 @@ router.put('/', async function (req, res, next) {
     }
 });
 
-router.put('/:projectId/remove', async function (req, res, next) {
+router.put('/:projectId/remove', validateCookie, async function (req, res, next) {
     try {
         const removeProjectRes = await api.hideProject(req.params.projectId)
         res.send(removeProjectRes)
@@ -42,7 +54,7 @@ router.put('/:projectId/remove', async function (req, res, next) {
 
 
 //POST
-router.post('/', async function (req, res, next) {
+router.post('/', validateCookie, async function (req, res, next) {
     try {
         const newProjectRes = api.addNewProject(req.body)
         res.send(newProjectRes)
@@ -52,7 +64,7 @@ router.post('/', async function (req, res, next) {
 });
 
 //DELETE
-router.delete('/remove/requiredtech/:projectId/:techId', function (req, res, next) {
+router.delete('/remove/requiredtech/:projectId/:techId', validateCookie, function (req, res, next) {
     try {
         const removeReqTechRes = api.removeReqTech(req.params.projectId, req.params.techId)
         res.send(removeReqTechRes)
@@ -61,7 +73,7 @@ router.delete('/remove/requiredtech/:projectId/:techId', function (req, res, nex
     }
 });
 
-router.delete('/remove/picture/:picId', function (req, res, next) {
+router.delete('/remove/picture/:picId', validateCookie, function (req, res, next) {
     try {
         const removePictureRes = api.removePicture(req.params.picId)
         res.send(removePictureRes)

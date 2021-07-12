@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/forum');
+const { validateCookie } = require('../utils/middlewares')
 
 //GET
 router.get('/:projectId', async function (req, res, next) {
@@ -8,7 +9,7 @@ router.get('/:projectId', async function (req, res, next) {
     try {
         const projectsThreadsComments = await api.getProjectsThreadsComments(req.params.projectId)
         console.log('in route: ', projectsThreadsComments)
-        res.send(JSON.stringify(projectsThreadsComments))
+        res.send(projectsThreadsComments)
     } catch (err) {
         console.log(err)
     }
@@ -16,7 +17,7 @@ router.get('/:projectId', async function (req, res, next) {
 
 
 //POST
-router.post('/thread', async function (req, res, next) {
+router.post('/thread', validateCookie, async function (req, res, next) {
     try {
         const addedThreadRes = await api.addNewThread(req.body)
         res.send(addedThreadRes)
@@ -26,7 +27,7 @@ router.post('/thread', async function (req, res, next) {
 
 });
 
-router.post('/comment', async function (req, res, next) {
+router.post('/comment', validateCookie, async function (req, res, next) {
     try {
         const addedCommentRes = await api.addNewComment(req.body)
         res.send(addedCommentRes)
