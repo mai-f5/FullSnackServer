@@ -42,16 +42,30 @@ const updateUserPassword = async updatedUserData => {
 
 
 //POST
-const login = async loginData => {
+// const login = async loginData => {
+//     try {
+//         return await User.findOne({attributes: {exclude:['password']} where: { username: loginData.username, password: loginData.password } })
+//     } catch (err) {
+//         console.log(err)
+//     }
+// }
+
+const login = async username => {
     try {
-        return await User.findOne({ where: { username: loginData.username, password: loginData.password } })
+        return await User.findOne({ where: { username: username } })
     } catch (err) {
         console.log(err)
     }
 }
 
 const addNewUser = async usersData => {
-    return await User.create({ ...usersData })
+    try {
+        return await User.create({ ...usersData })
+
+    } catch (err) {
+
+        console.log(err)
+    }
 }
 
 

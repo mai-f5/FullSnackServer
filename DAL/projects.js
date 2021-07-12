@@ -4,57 +4,63 @@ const { RequiredTech, DifficultyLevel, User, Project, ProjectPicture, ProjectTec
 
 // GET
 const getProjectsCardData = async formData => {
-    let whereClause = {};
-    // let wantedOrder = req.query.sortby === 'likes' ? [[sequelize.col('likesCounter'), 'DESC']] : ['timestamp', 'DESC'];
+    try {
+        let whereClause = {};
+        // let wantedOrder = req.query.sortby === 'likes' ? [[sequelize.col('likesCounter'), 'DESC']] : ['timestamp', 'DESC'];
 
-    if (formData.search) {
-        whereClause.name = { [Op.like]: `%${formData.search}%` }
+        if (formData.search) {
+            whereClause.name = { [Op.like]: `%${formData.search}%` }
+        }
+        if (formData.difflvls) {
+            whereClause.difficulty_level_id = formData.difflvls.split(',')
+        }
+        // if (req.query.reqtechs) {
+        //     whereClause['$project_required_tech_id.tech_id$'] = req.query.reqtechs.split(',')
+        // }
+        if (formData.user) {
+            whereClause.user_id = formData.user
+        }
+
+        const projectsCardsData = await Project.findAll(
+            {
+                attributes: ['id', 'name', 'assets_src', 'user_id', 'timestamp',
+                ],
+                where: whereClause,
+                include: [
+                    {
+                        model: ProjectPicture,
+                        as: 'projects_pictures',
+                        attributes: ['pic_src'],
+                        limit: 1
+                    },
+                    {
+                        model: RequiredTech,
+                        as: 'project_required_tech_id',
+                        attributes: ['id', 'name'],
+
+                    },
+
+                    {
+                        model: DifficultyLevel,
+                        as: 'difficulty_level',
+                        attributes: ['name']
+                    },
+                    {
+                        model: UserLike,
+                        as: 'liked_project_id',
+                    }
+                ],
+                // order: [[sequelize.fn('COUNT', sequelize.col('liked_project_id')), 'liked_project_id'], 'DESC'],
+                offset: 0, limit: 20
+                // offset: (req.query.currentpage - 1) * req.query.amount,
+                // limit: req.query.amount
+            })
+        console.log('hi')
+        console.log(projectsCardsData)
+        return projectsCardsData;
+    } catch (err) {
+        console.log(err)
     }
-    if (formData.difflvls) {
-        whereClause.difficulty_level_id = formData.difflvls.split(',')
-    }
-    // if (req.query.reqtechs) {
-    //     whereClause['$project_required_tech_id.tech_id$'] = req.query.reqtechs.split(',')
-    // }
-    if (formData.user) {
-        whereClause.user_id = formData.user
-    }
-
-    const projectsCardsData = await Project.findAll(
-        {
-            attributes: ['id', 'name', 'assets_src', 'user_id', 'timestamp',
-            ],
-            where: whereClause,
-            include: [
-                {
-                    model: ProjectPicture,
-                    as: 'projects_pictures',
-                    attributes: ['pic_src'],
-                    limit: 1
-                },
-                {
-                    model: RequiredTech,
-                    as: 'project_required_tech_id',
-                    attributes: ['id', 'name'],
-
-                },
-
-                {
-                    model: DifficultyLevel,
-                    as: 'difficulty_level',
-                    attributes: ['name']
-                },
-                {
-                    model: UserLike,
-                    as: 'liked_project_id',
-                }
-            ],
-            // order: [[sequelize.fn('COUNT', sequelize.col('liked_project_id')), 'liked_project_id'], 'DESC'],
-            offset: 0, limit: 20
-            // offset: (req.query.currentpage - 1) * req.query.amount,
-            // limit: req.query.amount
-        })
-    return projectsCardsData;
 }
 
 const getProjectData = async projectId => {
@@ -119,12 +125,72 @@ const hideProject = async projectId => {
 const addNewProject = async projectData => {
     //validations
     // adding to multiple tables (projects, projects pictures & projects techs)
-    return await Project.create({ ...projectData })
+    const project = await Project.create({
+        user_id: projectData.userId,
+        name: projectData.name,
+        difficulty_level_id: projectData.difficultyLevel,
+        github_link: projectData.github_link,
+        description: projectData.description,
+        assets_src: projectData.assetsSrc,
+        timestamp: Date.now()
+    })
+
+    projectData.requiredTechs.map(async techId => {
+        await ProjectTech.create({
+            project_id: project.id,
+            tech_id: techId.techId
+        })
+    });
+    projectData.pictures.map(async pic => {
+        await ProjectPicture.create({
+            project_id: project.id,
+            pic_src: pic.picSrc
+        })
+    })
+    return project.id
+    // .then(projectId => {
+    //     console.log(projectId)
+    //     projectData.requiredTechs.map(techId => {
+    //         console.log(techId)
+    //         ProjectTech.create({
+    //             project_id: projectId,
+    //             tech_id: techId.techId
+    //         })
+    //     })
+    //     projectData.pictures.map(pic => {
+    //         console.log(pic)
+    //         ProjectPicture.create({
+    //             project_id: projectId,
+    //             pic_src: pic.picSrc
+    //         })
+    //     })
+    // })
 }
+
+// {
+//  "name"   :"postit app",
+//  "difficultyLevl": "1",
+//  "requiredTechs":[
+//      {"techId":"1"},
+//      {"techId":"2"}
+//  ],
+//  "githubLink":"",
+//  "description":"",
+//  "pictures":[
+//      {
+//          "picSrc":"lala.png"
+//      }
+//  ],
+//  "asstesSrc":"lala.rar"
+// }
 
 //DELETE
 const removeReqTech = async (projectId, reqTechId) => {
-    return await ProjectTech.destroy({ where: { project_id: projectId, tech_id: reqTechId } })
+    try {
+        return await ProjectTech.destroy({ where: { project_id: projectId, tech_id: reqTechId } })
+    } catch (err) {
+        console.log(err)
+    }
 }
 // project picture
 const removePicture = async picId => {

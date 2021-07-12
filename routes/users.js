@@ -1,30 +1,18 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/users');
-const multer = require('multer')
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, `public/images/`)
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}.${file.mimetype === 'image/jpeg' ? 'jpg' : 'png'}`)
-  }
-})
-
-const upload = multer({ storage: storage })
-const cpUpload = upload.single('profileImg')
-
-
+const { validateCookie, cpUpload } = require('../utils/middlewares')
+const bcrypt = require('bcrypt')
+const saltRounds = 10;
 // GET
-router.get('/:userId', async function (req, res, next) {
+router.get('/:userId', validateCookie, async function (req, res, next) {
   const usersData = await api.getUserData(req.params.userId)
   // const usersData = await api.getUserData(req.params.userId)
   res.send(usersData);
 });
 
 // PUT
-router.put('/:user_id', cpUpload, async function (req, res, next) {
+router.put('/:user_id', cpUpload, validateCookie, async function (req, res, next) {
   try {
     const userUpdateRes = await api.updateUserData({ ...req.params, profile_img: `images/${req.file.filename}` })
     res.send(userUpdateRes)
@@ -34,7 +22,7 @@ router.put('/:user_id', cpUpload, async function (req, res, next) {
   }
 });
 
-router.put('/:userId/password', async function (req, res, next) {
+router.put('/:userId/password', validateCookie, async function (req, res, next) {
   try {
     const userPassUpdate = await api.updateUserPassword(req.body)
     res.send(userPassUpdate);
@@ -46,10 +34,14 @@ router.put('/:userId/password', async function (req, res, next) {
 
 
 //POST
-router.post('/', function (req, res, next) {
+router.post('/', async function (req, res, next) {
   //validations
   try {
-    const newUserId = api.addNewUser(req.body)
+
+    const { username, password, email } = req.body
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    console.log(hashedPassword)
+    const newUserId = api.addNewUser({ username, email, password: hashedPassword })
     res.send(newUserId)
   } catch (err) {
     console.log(err)
@@ -57,20 +49,28 @@ router.post('/', function (req, res, next) {
 });
 
 router.post('/login', async function (req, res, next) {
+  const { username, password } = req.body
+  //validate username
   try {
-    const userLoginRes = await api.login(req.body)
-    if (!userLoginRes) {
-      res.status(500).send('Incorrect Username/Password')
-    }
-    else {
-      res.send(userLoginRes)
-    }
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('Incorrect Username/Password')
-  }
+    const user = await api.login(username);
+    const match = await bcrypt.compare(password, user.password);
 
+    if (match) {
+      res.cookie('fsCookie', 'logged_in', { httpOnly: true })
+
+      const privateUser = { ...user.dataValues, password: '' }
+      res.send(privateUser)
+    } else {
+      res.status(403).send('Incorrect Username/Password')
+    }
+  } catch (err) {
+    res.status(403).send('Incorrect Username/Password')
+  }
+});
+
+
+router.delete('/logout', validateCookie, async function (req, res, next) {
+  response.clearCookie('fsCookie')
 });
 
 module.exports = router;
