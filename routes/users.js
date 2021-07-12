@@ -56,8 +56,8 @@ router.post('/login', async function (req, res, next) {
 
     if (match) {
 
-      const hashedUserId = await bcrypt.hash(JSON.stringify(user.dataValues.id), saltRounds);
-      res.cookie('fsCookie', hashedUserId, { httpOnly: true })
+      // const hashedUserId = await bcrypt.hash(JSON.stringify(user.dataValues.id), saltRounds);
+      res.cookie('fsCookie', JSON.stringify(user.id), { httpOnly: true })
 
       const privateUser = { ...user.dataValues, password: '' }
       res.send(privateUser)
