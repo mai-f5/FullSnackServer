@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/users');
-const { validateCookie, cpUpload } = require('../utils/middlewares')
+const { validateCookie, fileUploads } = require('../utils/middlewares')
 const bcrypt = require('bcrypt')
 const saltRounds = 10;
 // GET
@@ -12,9 +12,10 @@ router.get('/:userId', validateCookie, async function (req, res, next) {
 });
 
 // PUT
-router.put('/:userId', cpUpload, validateCookie, async function (req, res, next) {
+router.put('/:userId', fileUploads, validateCookie, async function (req, res, next) {
   try {
-    const userUpdateRes = await api.updateUserData({ ...req.params, profile_img: `images/${req.file.filename}` })
+    console.log(req.params)
+    const userUpdateRes = await api.updateUserData({ ...req.params, profile_img: `images/${req.files.profileImg[0].filename}` })
     res.send(userUpdateRes)
   }
   catch (err) {

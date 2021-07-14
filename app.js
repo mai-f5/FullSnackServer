@@ -31,6 +31,6 @@ app.use('/projects', projectsRouter);
 app.use('/events', eventsRouter);
 app.use('/forum', forumRouter);
 app.use('/staticdata', staticData);
-app.use('/static', express.static('public'))
+app.use('/public', express.static('public'))
 
 module.exports = app;

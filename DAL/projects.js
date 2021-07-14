@@ -5,7 +5,7 @@ const { RequiredTech, DifficultyLevel, User, Project, ProjectPicture, ProjectTec
 // GET
 const getProjectsCardData = async formData => {
     try {
-        let whereClause = {};
+        let whereClause = { is_visible: 1 };
         // let wantedOrder = req.query.sortby === 'likes' ? [[sequelize.col('likesCounter'), 'DESC']] : ['timestamp', 'DESC'];
 
         if (formData.search) {
@@ -48,15 +48,18 @@ const getProjectsCardData = async formData => {
                     {
                         model: UserLike,
                         as: 'liked_project_id',
-                    }
+                    },
+                    {
+                        model: User,
+                        as: 'user',
+                        attributes: ['id', 'username']
+                    },
                 ],
                 // order: [[sequelize.fn('COUNT', sequelize.col('liked_project_id')), 'liked_project_id'], 'DESC'],
-                offset: 0, limit: 20
+                // offset: 0, limit: 20
                 // offset: (req.query.currentpage - 1) * req.query.amount,
                 // limit: req.query.amount
             })
-        console.log('hi')
-        console.log(projectsCardsData)
         return projectsCardsData;
     } catch (err) {
         console.log(err)
@@ -109,9 +112,38 @@ const getProjectData = async projectId => {
 
 // PUT
 const updateProjectData = async updatedProjectData => {
-    return await Project.update({
-        ...updatedProjectData.rowData
-    }, { where: { id: updatedProjectData.projectId } })
+    const updatedProject = await Project.update({
+        name: updatedProjectData.name,
+        difficulty_level_id: updatedProjectData.difficultyLevel,
+        github_link: updatedProjectData.github_link,
+        description: updatedProjectData.description,
+        assets_src: updatedProjectData.assetsSrc,
+    }, { where: { id: updatedProjectData.id } })
+
+    const currentTechs = await ProjectTech.findAll({ attributes: ['tech_id'], where: { project_id: updatedProjectData.id } });
+    const updatedTechs = updatedProjectData.requiredTechs.split(',').map(id => +id)
+
+    //deleting all then adding updated -> if i'll have time i'll remove unneccesery and add new
+    currentTechs.forEach(async projectTech => {
+        const techId = projectTech.dataValues.tech_id;
+        await ProjectTech.destroy({ where: { project_id: updatedProjectData.id, tech_id: techId } })
+    })
+
+    updatedTechs.forEach(async projectTech => {
+        await ProjectTech.create({
+            tech_id: projectTech,
+            project_id: updatedProjectData.id
+        })
+    })
+
+
+    // console.log(totalProjectTechs)
+    // updatedProject.requiredTechs.split(',').map(async techId => {
+    //     console.log(techId)
+    //     await ProjectTech.update({
+    //         tech_id: techId
+    //     }, { where: { id: updatedProjectData.id } })
+    // });
     //update multiple table at once?
 }
 
@@ -123,48 +155,36 @@ const hideProject = async projectId => {
 
 //POST
 const addNewProject = async projectData => {
-    //validations
-    // adding to multiple tables (projects, projects pictures & projects techs)
-    const project = await Project.create({
-        user_id: projectData.userId,
-        name: projectData.name,
-        difficulty_level_id: projectData.difficultyLevel,
-        github_link: projectData.github_link,
-        description: projectData.description,
-        assets_src: projectData.assetsSrc,
-        timestamp: Date.now()
-    })
-
-    projectData.requiredTechs.map(async techId => {
-        await ProjectTech.create({
-            project_id: project.id,
-            tech_id: techId.techId
+    try {
+        //validations
+        // adding to multiple tables (projects, projects pictures & projects techs)
+        const project = await Project.create({
+            user_id: projectData.userId,
+            name: projectData.name,
+            difficulty_level_id: projectData.difficultyLevel,
+            github_link: projectData.github_link,
+            description: projectData.description,
+            assets_src: projectData.assetsSrc,
+            timestamp: Date.now()
         })
-    });
-    projectData.pictures.map(async pic => {
-        await ProjectPicture.create({
-            project_id: project.id,
-            pic_src: pic.picSrc
-        })
-    })
-    return project.id
-    // .then(projectId => {
-    //     console.log(projectId)
-    //     projectData.requiredTechs.map(techId => {
-    //         console.log(techId)
-    //         ProjectTech.create({
-    //             project_id: projectId,
-    //             tech_id: techId.techId
-    //         })
-    //     })
-    //     projectData.pictures.map(pic => {
-    //         console.log(pic)
-    //         ProjectPicture.create({
-    //             project_id: projectId,
-    //             pic_src: pic.picSrc
-    //         })
-    //     })
-    // })
+        projectData.requiredTechs.split(',').map(async techId => {
+            console.log(techId)
+            await ProjectTech.create({
+                project_id: project.id,
+                tech_id: techId
+            })
+        });
+        // projectData.pictures.split(',').map(async pic => {
+        //     await ProjectPicture.create({
+        //         project_id: project.id,
+        //         pic_src: pic.picSrc
+        //     })
+        // })
+        // return project.id
+        return project;
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 // {

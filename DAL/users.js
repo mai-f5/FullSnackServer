@@ -17,7 +17,7 @@ const updateUserData = async updatedUserData => {
     try {
         return await User.update({
             ...updatedUserData
-        }, { where: { id: updatedUserData.user_id } })
+        }, { where: { id: updatedUserData.userId } })
 
     } catch (err) {
         console.log(err)
