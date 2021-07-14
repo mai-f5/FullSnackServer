@@ -2,9 +2,8 @@ const sequelize = require('../config/database')
 const { User, Thread, Comment } = require('../models/associations');
 
 const getProjectsThreadsComments = async projectId => {
-
     try {
-        return await Thread.findAll({
+        const threadsComments = await Thread.findAll({
             where: { project_id: projectId },
             include: [
                 {
@@ -31,6 +30,8 @@ const getProjectsThreadsComments = async projectId => {
             order: [['timestamp', 'ASC']],
             limit: 20
         })
+
+        return JSON.stringify(threadsComments);
     } catch (err) {
         console.log(err)
     }
