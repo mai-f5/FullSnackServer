@@ -27,7 +27,7 @@ router.get('/dashboard', validateCookie, async function (req, res, next) {
 router.get('/:projectId', async function (req, res, next) {
     try {
         const data = await api.getProjectData(req.params.projectId)
-        res.send(data);
+        res.send(JSON.stringify(data));
     } catch (err) {
         console.log(err)
     }
@@ -36,16 +36,16 @@ router.get('/:projectId', async function (req, res, next) {
 //PUT
 router.put('/', fileUploads, validateCookie, async function (req, res, next) {
     try {
-        const updateProjectRes = api.updateProjectData(req.body)
+        const updateProjectRes = await api.updateProjectData({ ...req.body })
         res.send(updateProjectRes)
     } catch (err) {
         console.log(err)
     }
 });
 
-router.put('/:projectId/remove', validateCookie, async function (req, res, next) {
+router.put('/:projectId/:userId/remove', validateCookie, async function (req, res, next) {
     try {
-        const removeProjectRes = await api.hideProject(req.params.projectId)
+        const removeProjectRes = await api.hideProject(req.params.projectId, req.params.userId)
         res.send(removeProjectRes)
     } catch (err) {
         console.log(err)
@@ -67,18 +67,18 @@ router.post('/', fileUploads, validateCookie, async function (req, res, next) {
 });
 
 //DELETE
-router.delete('/remove/requiredtech/:projectId/:techId', validateCookie, function (req, res, next) {
+router.delete('/remove/requiredtech/:projectId/:techId', validateCookie, async function (req, res, next) {
     try {
-        const removeReqTechRes = api.removeReqTech(req.params.projectId, req.params.techId)
+        const removeReqTechRes = await api.removeReqTech(req.params.projectId, req.params.techId)
         res.send(removeReqTechRes)
     } catch (err) {
         console.log(err)
     }
 });
 
-router.delete('/remove/picture/:picId', validateCookie, function (req, res, next) {
+router.delete('/remove/picture/:picId', validateCookie, async function (req, res, next) {
     try {
-        const removePictureRes = api.removePicture(req.params.picId)
+        const removePictureRes = await api.removePicture(req.params.picId)
         res.send(removePictureRes)
     } catch (err) {
         console.log(err)

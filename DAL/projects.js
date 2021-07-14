@@ -5,7 +5,7 @@ const { RequiredTech, DifficultyLevel, User, Project, ProjectPicture, ProjectTec
 // GET
 const getProjectsCardData = async formData => {
     try {
-        let whereClause = {};
+        let whereClause = { is_visible: 1 };
         // let wantedOrder = req.query.sortby === 'likes' ? [[sequelize.col('likesCounter'), 'DESC']] : ['timestamp', 'DESC'];
 
         if (formData.search) {
@@ -48,15 +48,18 @@ const getProjectsCardData = async formData => {
                     {
                         model: UserLike,
                         as: 'liked_project_id',
-                    }
+                    },
+                    {
+                        model: User,
+                        as: 'user',
+                        attributes: ['id', 'username']
+                    },
                 ],
                 // order: [[sequelize.fn('COUNT', sequelize.col('liked_project_id')), 'liked_project_id'], 'DESC'],
-                offset: 0, limit: 20
+                // offset: 0, limit: 20
                 // offset: (req.query.currentpage - 1) * req.query.amount,
                 // limit: req.query.amount
             })
-        console.log('hi')
-        console.log(projectsCardsData)
         return projectsCardsData;
     } catch (err) {
         console.log(err)
@@ -109,9 +112,38 @@ const getProjectData = async projectId => {
 
 // PUT
 const updateProjectData = async updatedProjectData => {
-    return await Project.update({
-        ...updatedProjectData.rowData
-    }, { where: { id: updatedProjectData.projectId } })
+    const updatedProject = await Project.update({
+        name: updatedProjectData.name,
+        difficulty_level_id: updatedProjectData.difficultyLevel,
+        github_link: updatedProjectData.github_link,
+        description: updatedProjectData.description,
+        assets_src: updatedProjectData.assetsSrc,
+    }, { where: { id: updatedProjectData.id } })
+
+    const currentTechs = await ProjectTech.findAll({ attributes: ['tech_id'], where: { project_id: updatedProjectData.id } });
+    const updatedTechs = updatedProjectData.requiredTechs.split(',').map(id => +id)
+
+    //deleting all then adding updated -> if i'll have time i'll remove unneccesery and add new
+    currentTechs.forEach(async projectTech => {
+        const techId = projectTech.dataValues.tech_id;
+        await ProjectTech.destroy({ where: { project_id: updatedProjectData.id, tech_id: techId } })
+    })
+
+    updatedTechs.forEach(async projectTech => {
+        await ProjectTech.create({
+            tech_id: projectTech,
+            project_id: updatedProjectData.id
+        })
+    })
+
+
+    // console.log(totalProjectTechs)
+    // updatedProject.requiredTechs.split(',').map(async techId => {
+    //     console.log(techId)
+    //     await ProjectTech.update({
+    //         tech_id: techId
+    //     }, { where: { id: updatedProjectData.id } })
+    // });
     //update multiple table at once?
 }
 
@@ -135,14 +167,13 @@ const addNewProject = async projectData => {
             assets_src: projectData.assetsSrc,
             timestamp: Date.now()
         })
-        return project;
-        // projectData.requiredTechs.split(',').map(async techId => {
-        //     console.log(techId)
-        //     await ProjectTech.create({
-        //         project_id: project.id,
-        //         tech_id: techId
-        //     })
-        // });
+        projectData.requiredTechs.split(',').map(async techId => {
+            console.log(techId)
+            await ProjectTech.create({
+                project_id: project.id,
+                tech_id: techId
+            })
+        });
         // projectData.pictures.split(',').map(async pic => {
         //     await ProjectPicture.create({
         //         project_id: project.id,
@@ -150,6 +181,7 @@ const addNewProject = async projectData => {
         //     })
         // })
         // return project.id
+        return project;
     } catch (err) {
         console.log(err)
     }
