@@ -123,48 +123,36 @@ const hideProject = async projectId => {
 
 //POST
 const addNewProject = async projectData => {
-    //validations
-    // adding to multiple tables (projects, projects pictures & projects techs)
-    const project = await Project.create({
-        user_id: projectData.userId,
-        name: projectData.name,
-        difficulty_level_id: projectData.difficultyLevel,
-        github_link: projectData.github_link,
-        description: projectData.description,
-        assets_src: projectData.assetsSrc,
-        timestamp: Date.now()
-    })
-
-    projectData.requiredTechs.map(async techId => {
-        await ProjectTech.create({
-            project_id: project.id,
-            tech_id: techId.techId
+    try {
+        //validations
+        // adding to multiple tables (projects, projects pictures & projects techs)
+        const project = await Project.create({
+            user_id: projectData.userId,
+            name: projectData.name,
+            difficulty_level_id: projectData.difficultyLevel,
+            github_link: projectData.github_link,
+            description: projectData.description,
+            assets_src: projectData.assetsSrc,
+            timestamp: Date.now()
         })
-    });
-    projectData.pictures.map(async pic => {
-        await ProjectPicture.create({
-            project_id: project.id,
-            pic_src: pic.picSrc
-        })
-    })
-    return project.id
-    // .then(projectId => {
-    //     console.log(projectId)
-    //     projectData.requiredTechs.map(techId => {
-    //         console.log(techId)
-    //         ProjectTech.create({
-    //             project_id: projectId,
-    //             tech_id: techId.techId
-    //         })
-    //     })
-    //     projectData.pictures.map(pic => {
-    //         console.log(pic)
-    //         ProjectPicture.create({
-    //             project_id: projectId,
-    //             pic_src: pic.picSrc
-    //         })
-    //     })
-    // })
+        return project;
+        // projectData.requiredTechs.split(',').map(async techId => {
+        //     console.log(techId)
+        //     await ProjectTech.create({
+        //         project_id: project.id,
+        //         tech_id: techId
+        //     })
+        // });
+        // projectData.pictures.split(',').map(async pic => {
+        //     await ProjectPicture.create({
+        //         project_id: project.id,
+        //         pic_src: pic.picSrc
+        //     })
+        // })
+        // return project.id
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 // {

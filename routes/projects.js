@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/projects');
-const { validateCookie, cpUpload } = require('../utils/middlewares')
+const { validateCookie, fileUploads } = require('../utils/middlewares')
 
 // GET
 router.get('/', async function (req, res, next) {
@@ -34,7 +34,7 @@ router.get('/:projectId', async function (req, res, next) {
 });
 
 //PUT
-router.put('/', validateCookie, async function (req, res, next) {
+router.put('/', fileUploads, validateCookie, async function (req, res, next) {
     try {
         const updateProjectRes = api.updateProjectData(req.body)
         res.send(updateProjectRes)
@@ -54,9 +54,12 @@ router.put('/:projectId/remove', validateCookie, async function (req, res, next)
 
 
 //POST
-router.post('/', validateCookie, async function (req, res, next) {
+router.post('/', fileUploads, validateCookie, async function (req, res, next) {
     try {
-        const newProjectRes = api.addNewProject(req.body)
+        console.log('hi')
+        console.log(req.body)
+        //  pictures: [...req.body.pictures.split(',').map(obj => obj)]
+        const newProjectRes = await api.addNewProject({ ...req.body })
         res.send(newProjectRes)
     } catch (err) {
         console.log(err)
