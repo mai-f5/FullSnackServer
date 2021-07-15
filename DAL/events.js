@@ -24,7 +24,6 @@ const getUsersNewNotifications = async userId => {
                 attributes: ['id']
             }
         ]
-
     })
 }
 
@@ -41,7 +40,7 @@ const updateNotificationsAsRead = async userId => {
 const addNewNotification = async notificationData => {
     return await Notification.create({
         ...notificationData,
-        timestamp: JSON.stringify(Date.now())
+        timestamp: Date.now()
     })
 }
 
@@ -49,12 +48,14 @@ const addNewNotification = async notificationData => {
 //LIKES
 //GET
 const getDidUserLikeProject = async (userId, projectId) => {
-    return await UserLike.findOne({ where: { user_id: userId, liked_project_id: projectId } }) ? true : false
+    const didUserLikeRes = await UserLike.findOne({ where: { user_id: userId, liked_project_id: projectId } });
+    return didUserLikeRes ? true : false;
+
 }
 
 //POST
 const addNewLike = async likeData => {
-    return await UserLike.create({ ...likeData })
+    return await UserLike.create({ user_id: likeData.userId, liked_project_id: likeData.projectId })
 }
 
 
