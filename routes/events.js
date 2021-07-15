@@ -23,6 +23,7 @@ router.put('/notifications/:userId', validateCookie, async function (req, res, n
 
 //POST
 router.post('/notifications', async function (req, res, next) {
+    console.log('req body notification post', req.body)
     try {
         const newNotifRes = await api.addNewNotification(req.body)
         res.send(newNotifRes)
@@ -48,6 +49,7 @@ router.get('/likes/:userId/:projectId', validateCookie, async function (req, res
 
 //POST
 router.post('/likes', validateCookie, async function (req, res, next) {
+    console.log(req.body)
     try {
         const addLikeRes = await api.addNewLike(req.body)
         res.send(JSON.stringify(addLikeRes))
@@ -57,7 +59,7 @@ router.post('/likes', validateCookie, async function (req, res, next) {
 });
 
 //DELETE
-router.delete('/likes/:userId/:projectId', async function (req, res, next) {
+router.delete('/likes/:userId/:projectId', validateCookie, async function (req, res, next) {
     try {
         const removeLikeRes = await api.removeLike(req.params.userId, req.params.projectId)
         res.send(JSON.stringify(removeLikeRes))
