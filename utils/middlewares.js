@@ -21,7 +21,7 @@ const fileUploads = upload.fields([
 //COOKIES
 async function validateCookie(req, res, next) {
     const cookies = req.cookies;
-    const currentUserId = req.params.userId || req.query.userId || req.body.userId;
+    const currentUserId = req.params.userId || req.query.userId || req.body.userId || req.body.user_id;
     if ('fsCookie' in cookies) {
         console.log(cookies.fsCookie)
         if (cookies.fsCookie == currentUserId) next();
