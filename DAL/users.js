@@ -5,13 +5,22 @@ const { User } = require('../models/associations');
 //GET
 const getUserData = async userId => {
     try {
-        const usersData = await User.findByPk(userId, { include: ['gender', 'occupation'], plain: true })
+        const usersData = await User.findByPk(userId, { include: ['gender', 'occupation'] })
+        delete usersData.dataValues['password']
         return usersData;
     } catch (err) {
         console.log(err)
     }
 }
 
+const getUserPassword = async userId => {
+    try {
+        const userPassword = await User.findByPk(userId, { attributes: ['password'] })
+        return userPassword
+    } catch (err) {
+        console.log(err)
+    }
+}
 //PUT
 const updateUserData = async updatedUserData => {
     try {
@@ -28,15 +37,9 @@ const updateUserData = async updatedUserData => {
 
 const updateUserPassword = async updatedUserData => {
     try {
-        //will validate passwords (that new ones match & old and new dont)
-        let isOldPassCorrect = await User.findOne({ where: { id: updatedUserData.userId, password: updatedUserData.oldPassword } });
-        if (isOldPassCorrect) {
-            return await User.update({
-                password: updatedUserData.newPassword
-            }, { where: { id: updatedUserData.userId } })
-        } else {
-            throw new Error("Incorrect password")
-        }
+        return await User.update({
+            password: updatedUserData.newPassword
+        }, { where: { id: updatedUserData.userId } })
     } catch (err) {
         console.log(err)
     }
@@ -62,4 +65,4 @@ const addNewUser = async usersData => {
 }
 
 
-module.exports = { getUserData, updateUserData, login, addNewUser, updateUserPassword }
+module.exports = { getUserData, getUserPassword, updateUserData, login, addNewUser, updateUserPassword }

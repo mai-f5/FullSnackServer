@@ -12,8 +12,6 @@ router.get('/:userId', validateCookie, async function (req, res, next) {
 
 // PUT
 router.put('/:userId', fileUploads, validateCookie, async function (req, res, next) {
-  console.log('testttttttt', req.files, req.files.profileImg)
-  console.log(req.body)
   try {
     const updatedUser = {
       ...req.body
@@ -32,10 +30,18 @@ router.put('/:userId', fileUploads, validateCookie, async function (req, res, ne
   }
 });
 
-router.put('/:userId/password', validateCookie, async function (req, res, next) {
+router.put('/password/:userId', validateCookie, async function (req, res, next) {
   try {
-    const userPassUpdate = await api.updateUserPassword(req.body)
-    res.send(userPassUpdate);
+    const { oldPassword, newPassword } = req.body
+    const usersDbPassword = await api.getUserPassword(req.body.userId);
+    const match = await bcrypt.compare(oldPassword, usersDbPassword.dataValues.password);
+    if (match) {
+      const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds)
+      await api.updateUserPassword({ ...req.body, newPassword: hashedNewPassword })
+      res.status(200).send({ changed: true });
+    } else {
+      res.status(401).send({ changed: false })
+    }
   } catch (err) {
     console.log(err)
   }
@@ -57,17 +63,16 @@ router.post('/', async function (req, res, next) {
 });
 
 router.post('/login', async function (req, res, next) {
-  const { username, password } = req.body
   //validate username
   try {
+    const { username, password } = req.body
     const user = await api.login(username);
     const match = await bcrypt.compare(password, user.password);
 
     if (match) {
       res.cookie('fsCookie', JSON.stringify(user.id), { sameSite: true })
-
-      const privateUser = { ...user.dataValues, password: '' }
-      res.send(privateUser)
+      delete user.dataValues['password']
+      res.send(user)
     } else {
       res.status(403).send('Incorrect Username/Password')
     }
