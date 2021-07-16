@@ -17,7 +17,7 @@ const getProjectsThreadsComments = async projectId => {
                         }
                     ],
                     order: [['timestamp', 'ASC']],
-                    limit: 20
+                    // limit: 20
 
                 },
                 {
@@ -28,7 +28,7 @@ const getProjectsThreadsComments = async projectId => {
                 }
             ],
             order: [['timestamp', 'ASC']],
-            limit: 20
+            // limit: 20
         })
 
         return JSON.stringify(threadsComments);
