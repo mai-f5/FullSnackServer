@@ -16,7 +16,9 @@ const getUserData = async userId => {
 const updateUserData = async updatedUserData => {
     try {
         return await User.update({
-            ...updatedUserData
+            ...updatedUserData,
+            gender_id: updatedUserData.gender,
+            occupation_id: updatedUserData.occupation === 'Select occupation' ? null : updatedUserData.occupation,
         }, { where: { id: updatedUserData.userId } })
 
     } catch (err) {
