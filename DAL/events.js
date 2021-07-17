@@ -55,12 +55,21 @@ const getDidUserLikeProject = async (userId, projectId) => {
 
 //POST
 const addNewLike = async likeData => {
+    const currentLikes = await Project.findByPk(likeData.projectId, { attributes: ['likesCounter'] })
+    await Project.update({
+        likesCounter: currentLikes.dataValues.likesCounter + 1,
+    }, { where: { id: likeData.projectId } })
+
     return await UserLike.create({ user_id: likeData.userId, liked_project_id: likeData.projectId })
 }
 
 
 //DELETE
 const removeLike = async (userId, projectId) => {
+    const currentLikes = await Project.findByPk(projectId, { attributes: ['likesCounter'] })
+    await Project.update({
+        likesCounter: currentLikes.dataValues.likesCounter - 1,
+    }, { where: { id: projectId } })
     return await UserLike.destroy({ where: { user_id: userId, liked_project_id: projectId } })
 }
 
