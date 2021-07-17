@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const path = require('path')
 const api = require('../DAL/projects');
 const { validateCookie, fileUploads } = require('../utils/middlewares')
 
@@ -33,10 +34,32 @@ router.get('/:projectId', async function (req, res, next) {
     }
 });
 
+router.get('/download/:filename', async function (req, res, next) {
+    try {
+        console.log('i do')
+        const fileName = req.params.filename;
+        var fileLocation = path.join('public/files/', fileName);
+        console.log(fileLocation);
+        res.download(fileLocation, fileName);
+    } catch (err) {
+        console.log(err)
+    }
+})
+
 //PUT
 router.put('/', fileUploads, validateCookie, async function (req, res, next) {
+    const dataObj = { ...req.body }
+    if (dataObj.pictures) delete dataObj.pictures
+    if (req.files) {
+        if (req.files.assetsSrc) {
+            dataObj.assetsSrc = `files/${req.files.assetsSrc[0].filename}`
+        }
+        if (req.files.pictures) {
+            dataObj.pictures = req.files.pictures
+        }
+    }
     try {
-        const updateProjectRes = await api.updateProjectData({ ...req.body })
+        const updateProjectRes = await api.updateProjectData({ ...dataObj })
         res.send(updateProjectRes)
     } catch (err) {
         console.log(err)
@@ -55,11 +78,17 @@ router.put('/:projectId/:userId/remove', validateCookie, async function (req, re
 
 //POST
 router.post('/', fileUploads, validateCookie, async function (req, res, next) {
+    const dataObj = { ...req.body }
+    if (req.files) {
+        if (req.files.assetsSrc) {
+            dataObj.assetsSrc = `files/${req.files.assetsSrc[0].filename}`
+        }
+        if (req.files.pictures) {
+            dataObj.pictures = req.files.pictures
+        }
+    }
     try {
-        console.log('hi')
-        console.log(req.body)
-        //  pictures: [...req.body.pictures.split(',').map(obj => obj)]
-        const newProjectRes = await api.addNewProject({ ...req.body })
+        const newProjectRes = await api.addNewProject({ ...dataObj })
         res.send(newProjectRes)
     } catch (err) {
         console.log(err)
@@ -79,7 +108,7 @@ router.delete('/remove/requiredtech/:projectId/:techId', validateCookie, async f
 router.delete('/remove/picture/:picId', validateCookie, async function (req, res, next) {
     try {
         const removePictureRes = await api.removePicture(req.params.picId)
-        res.send(removePictureRes)
+        res.sendStatus(200)
     } catch (err) {
         console.log(err)
     }

@@ -3,7 +3,7 @@ const multer = require('multer')
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, `public/images/`)
+        cb(null, `public/files/`)
     },
     filename: function (req, file, cb) {
         cb(null, `${Date.now()}_${file.originalname}`)
@@ -22,7 +22,6 @@ async function validateCookie(req, res, next) {
     const cookies = req.cookies;
     const currentUserId = req.params.userId || req.query.userId || req.body.userId || req.body.user_id;
     if ('fsCookie' in cookies) {
-        console.log(cookies.fsCookie)
         if (cookies.fsCookie == currentUserId) next();
         else {
             res.status(403).send({ msg: 'Not logged in' })
