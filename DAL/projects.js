@@ -1,29 +1,55 @@
+
 const sequelize = require('../config/database')
+const { Op } = require("sequelize");
 const { RequiredTech, DifficultyLevel, User, Project, ProjectPicture, ProjectTech, UserLike } = require('../models/associations');
 const { removeFile } = require('../utils/filesHandling')
 
 // GET
 const getProjectsCardData = async formData => {
     try {
-        let whereClause = { is_visible: 1 };
-        // let wantedOrder = req.query.sortby === 'likes' ? [[sequelize.col('likesCounter'), 'DESC']] : ['timestamp', 'DESC'];
+        const wantedOrder = formData.sortby === 'likes' ? [['likesCounter', 'DESC']] : [['timestamp', 'DESC']];
+        let whereClause = {
+            is_visible: 1,
+            name: {
+                [Op.like]: `%${formData.search ? formData.search : ''}%`
+            },
 
-        if (formData.search) {
-            whereClause.name = { [Op.like]: `%${formData.search}%` }
-        }
+        };
+
         if (formData.difflvls) {
             whereClause.difficulty_level_id = formData.difflvls.split(',')
         }
-        // if (req.query.reqtechs) {
-        //     whereClause['$project_required_tech_id.tech_id$'] = req.query.reqtechs.split(',')
+
+        if (formData.assets) {
+            if (formData.assets === '1') {
+                whereClause.assets_src = {
+                    [Op.gt]: ''
+                }
+            } else if (formData.assets === '0') {
+                whereClause.assets_src = {
+                    [Op.or]: [null, '']
+                }
+            }
+        }
+
+        // if (formData.reqtechs) {
+        //     whereClause['$project_required_tech_id.id$'] = {
+        //         [Op.in]: formData.reqtechs.split(',')
+        //     }
         // }
+
+        let reqTechWhere = {}
+        if (formData.reqtechs) {
+            reqTechWhere.id = formData.reqtechs.split(',')
+        }
+
         if (formData.userId) {
             whereClause.user_id = formData.userId
         }
 
         const projectsCardsData = await Project.findAll(
             {
-                attributes: ['id', 'name', 'assets_src', 'user_id', 'timestamp',
+                attributes: ['id', 'name', 'assets_src', 'user_id', 'timestamp', 'likesCounter'
                 ],
                 where: whereClause,
                 include: [
@@ -37,13 +63,12 @@ const getProjectsCardData = async formData => {
                         model: RequiredTech,
                         as: 'project_required_tech_id',
                         attributes: ['id', 'name'],
-
+                        where: reqTechWhere, ///temp (when filtering by tech, changes the reqtech data in the card as well..)
                     },
-
                     {
                         model: DifficultyLevel,
                         as: 'difficulty_level',
-                        attributes: ['name']
+                        attributes: ['name'],
                     },
                     {
                         model: UserLike,
@@ -52,15 +77,16 @@ const getProjectsCardData = async formData => {
                     {
                         model: User,
                         as: 'user',
-                        attributes: ['id', 'username']
+                        attributes: ['id', 'username'],
                     },
                 ],
-                // order: [[sequelize.fn('COUNT', sequelize.col('liked_project_id')), 'liked_project_id'], 'DESC'],
-                // offset: 0, limit: 20
-                // offset: (req.query.currentpage - 1) * req.query.amount,
-                // limit: req.query.amount
+                order: wantedOrder,
+                offset: (formData.currentpage - 1) * formData.amount,
+                limit: +formData.amount
             })
+
         return projectsCardsData;
+
     } catch (err) {
         console.log(err)
     }
@@ -68,8 +94,6 @@ const getProjectsCardData = async formData => {
 
 const getProjectData = async projectId => {
     try {
-        //check if already have?
-        //if not:
         const projectData = await Project.findByPk(projectId, {
             where: { is_visible: 1 },
             include: [
@@ -97,9 +121,6 @@ const getProjectData = async projectId => {
                 {
                     model: UserLike,
                     as: 'liked_project_id',
-                    // attributes: [
-                    //     [sequelize.fn('COUNT', sequelize.col('liked_project_id')), 'count']
-                    // ]
                 }
 
             ]
@@ -121,7 +142,6 @@ const updateProjectData = async updatedProjectData => {
     }, { where: { id: updatedProjectData.id } })
 
     if (updatedProjectData.pictures) {
-        console.log('hiii', updatedProjectData)
         updatedProjectData.pictures.forEach(async projectPic => {
             await ProjectPicture.create({
                 project_id: updatedProjectData.id,
@@ -129,7 +149,6 @@ const updateProjectData = async updatedProjectData => {
             })
         })
     }
-
 
     const currentTechs = await ProjectTech.findAll({ attributes: ['tech_id'], where: { project_id: updatedProjectData.id } });
     const updatedTechs = updatedProjectData.requiredTechs.split(',').map(id => +id)
@@ -146,16 +165,6 @@ const updateProjectData = async updatedProjectData => {
             project_id: updatedProjectData.id
         })
     })
-
-
-    // console.log(totalProjectTechs)
-    // updatedProject.requiredTechs.split(',').map(async techId => {
-    //     console.log(techId)
-    //     await ProjectTech.update({
-    //         tech_id: techId
-    //     }, { where: { id: updatedProjectData.id } })
-    // });
-    //update multiple table at once?
 }
 
 const hideProject = async projectId => {
@@ -187,7 +196,6 @@ const addNewProject = async projectData => {
         });
 
         if (projectData.pictures) {
-            console.log('hiii', projectData)
             projectData.pictures.forEach(async projectPic => {
                 await ProjectPicture.create({
                     project_id: project.id,
