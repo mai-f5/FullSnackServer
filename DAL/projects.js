@@ -1,6 +1,6 @@
 const sequelize = require('../config/database')
 const { RequiredTech, DifficultyLevel, User, Project, ProjectPicture, ProjectTech, UserLike } = require('../models/associations');
-
+const { removeFile } = require('../utils/filesHandling')
 
 // GET
 const getProjectsCardData = async formData => {
@@ -115,10 +115,21 @@ const updateProjectData = async updatedProjectData => {
     const updatedProject = await Project.update({
         name: updatedProjectData.name,
         difficulty_level_id: updatedProjectData.difficultyLevel,
-        github_link: updatedProjectData.github_link,
+        github_url: updatedProjectData.githubLink,
         description: updatedProjectData.description,
         assets_src: updatedProjectData.assetsSrc,
     }, { where: { id: updatedProjectData.id } })
+
+    if (updatedProjectData.pictures) {
+        console.log('hiii', updatedProjectData)
+        updatedProjectData.pictures.forEach(async projectPic => {
+            await ProjectPicture.create({
+                project_id: updatedProjectData.id,
+                pic_src: `files/${projectPic.filename}`
+            })
+        })
+    }
+
 
     const currentTechs = await ProjectTech.findAll({ attributes: ['tech_id'], where: { project_id: updatedProjectData.id } });
     const updatedTechs = updatedProjectData.requiredTechs.split(',').map(id => +id)
@@ -174,35 +185,22 @@ const addNewProject = async projectData => {
                 tech_id: techId
             })
         });
-        // projectData.pictures.split(',').map(async pic => {
-        //     await ProjectPicture.create({
-        //         project_id: project.id,
-        //         pic_src: pic.picSrc
-        //     })
-        // })
-        // return project.id
+
+        if (projectData.pictures) {
+            console.log('hiii', projectData)
+            projectData.pictures.forEach(async projectPic => {
+                await ProjectPicture.create({
+                    project_id: project.id,
+                    pic_src: `files/${projectPic.filename}`
+                })
+            })
+        }
+
         return project;
     } catch (err) {
         console.log(err)
     }
 }
-
-// {
-//  "name"   :"postit app",
-//  "difficultyLevl": "1",
-//  "requiredTechs":[
-//      {"techId":"1"},
-//      {"techId":"2"}
-//  ],
-//  "githubLink":"",
-//  "description":"",
-//  "pictures":[
-//      {
-//          "picSrc":"lala.png"
-//      }
-//  ],
-//  "asstesSrc":"lala.rar"
-// }
 
 //DELETE
 const removeReqTech = async (projectId, reqTechId) => {
@@ -214,7 +212,13 @@ const removeReqTech = async (projectId, reqTechId) => {
 }
 // project picture
 const removePicture = async picId => {
-    return await ProjectPicture.destroy({ where: { id: picId } })
+    try {
+        const filePath = await ProjectPicture.findByPk(picId, { attributes: ['pic_src'] });
+        removeFile(filePath.dataValues.pic_src)
+        return await ProjectPicture.destroy({ where: { id: picId } })
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 module.exports = { getProjectsCardData, getProjectData, updateProjectData, hideProject, addNewProject, removeReqTech, removePicture }

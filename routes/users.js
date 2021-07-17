@@ -17,7 +17,7 @@ router.put('/:userId', fileUploads, validateCookie, async function (req, res, ne
       ...req.body
     }
     if (req.files && req.files.profileImg) {
-      updatedUser['profile_img'] = `images/${req.files.profileImg[0].filename}`
+      updatedUser['profile_img'] = `files/${req.files.profileImg[0].filename}`
     };
 
     const userUpdateRes = await api.updateUserData({
