@@ -9,6 +9,10 @@ const ProjectTech = db.define('project_tech', {
     references: {
       model: 'required_techs',
       key: 'id'
+    },
+    validate: {
+      notNull: true,
+      notEmpty: true,
     }
   },
   project_id: {
@@ -18,6 +22,10 @@ const ProjectTech = db.define('project_tech', {
     references: {
       model: 'projects',
       key: 'id'
+    },
+    validate: {
+      notNull: true,
+      notEmpty: true,
     }
   }
 }, {

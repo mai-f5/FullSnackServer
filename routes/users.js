@@ -50,7 +50,6 @@ router.put('/password/:userId', validateCookie, async function (req, res, next) 
 
 //POST
 router.post('/', async function (req, res, next) {
-  //validations
   try {
     const { username, password, email } = req.body
     const hashedPassword = await bcrypt.hash(password, saltRounds)
@@ -63,7 +62,6 @@ router.post('/', async function (req, res, next) {
 });
 
 router.post('/login', async function (req, res, next) {
-  //validate username
   try {
     const { username, password } = req.body
     const user = await api.login(username);

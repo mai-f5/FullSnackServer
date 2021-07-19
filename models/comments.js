@@ -11,6 +11,10 @@ const Comment = db.define('comments', {
   user_id: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    },
     references: {
       model: 'users',
       key: 'id'
@@ -19,6 +23,10 @@ const Comment = db.define('comments', {
   thread_id: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    },
     references: {
       model: 'threads',
       key: 'id'
@@ -26,11 +34,20 @@ const Comment = db.define('comments', {
   },
   text: {
     type: Sequelize.STRING(500),
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+      len: [1, 500]
+    }
   },
   timestamp: {
     type: Sequelize.DATE,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    }
   }
 }, {
   db,

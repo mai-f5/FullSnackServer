@@ -11,6 +11,10 @@ const ProjectPicture = db.define('projects_pictures', {
   project_id: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    },
     references: {
       model: 'projects',
       key: 'id'
@@ -18,8 +22,12 @@ const ProjectPicture = db.define('projects_pictures', {
   },
   pic_src: {
     type: Sequelize.STRING(255),
-    allowNull: false
-  }
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    }
+  },
 }, {
   db,
   tableName: 'projects_pictures',

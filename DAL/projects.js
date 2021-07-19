@@ -151,7 +151,7 @@ const updateProjectData = async updatedProjectData => {
     }
 
     const currentTechs = await ProjectTech.findAll({ attributes: ['tech_id'], where: { project_id: updatedProjectData.id } });
-    const updatedTechs = updatedProjectData.requiredTechs.split(',').map(id => +id)
+    const updatedTechs = updatedProjectData.requiredTechnologies.split(',').map(id => +id)
 
     //deleting all then adding updated -> if i'll have time i'll remove unneccesery and add new
     currentTechs.forEach(async projectTech => {
@@ -187,7 +187,7 @@ const addNewProject = async projectData => {
             assets_src: projectData.assetsSrc,
             timestamp: Date.now()
         })
-        projectData.requiredTechs.split(',').map(async techId => {
+        projectData.requiredTechnologies.split(',').map(async techId => {
             console.log(techId)
             await ProjectTech.create({
                 project_id: project.id,
