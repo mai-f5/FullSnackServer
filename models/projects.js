@@ -14,11 +14,20 @@ const Project = db.define('projects', {
     references: {
       model: 'users',
       key: 'id'
+    },
+    validate: {
+      notNull: true,
+      notEmpty: true,
     }
   },
   name: {
     type: Sequelize.STRING(30),
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+      len: [4, 20]
+    }
   },
   difficulty_level_id: {
     type: Sequelize.INTEGER,
@@ -26,6 +35,10 @@ const Project = db.define('projects', {
     references: {
       model: 'difficulty_levels',
       key: 'id'
+    },
+    validate: {
+      notNull: true,
+      notEmpty: true,
     }
   },
   description: {
@@ -38,11 +51,15 @@ const Project = db.define('projects', {
   },
   github_url: {
     type: Sequelize.STRING(255),
-    allowNull: true
+    allowNull: true,
   },
   timestamp: {
     type: Sequelize.DATE,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    }
   },
   is_visible: {
     type: Sequelize.TINYINT,

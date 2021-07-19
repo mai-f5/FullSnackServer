@@ -11,15 +11,30 @@ const User = db.define('users', {
   username: {
     type: Sequelize.STRING(20),
     allowNull: false,
-    unique: "username_UNIQUE"
+    unique: "username_UNIQUE",
+    validate: {
+      notNull: true,
+      notEmpty: true,
+      is: /^[a-zA-Z0-9]{4,12}$/,
+      len: [4, 12],
+    }
   },
   email: {
     type: Sequelize.STRING(50),
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+      isEmail: true
+    }
   },
   password: {
     type: Sequelize.STRING(255),
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    }
   },
   birthdate: {
     type: Sequelize.DATEONLY,

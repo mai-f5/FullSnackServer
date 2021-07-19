@@ -14,6 +14,10 @@ const Thread = db.define('threads', {
     references: {
       model: 'projects',
       key: 'id'
+    },
+    validate: {
+      notNull: true,
+      notEmpty: true,
     }
   },
   user_id: {
@@ -22,19 +26,35 @@ const Thread = db.define('threads', {
     references: {
       model: 'users',
       key: 'id'
+    },
+    validate: {
+      notNull: true,
+      notEmpty: true,
     }
   },
   timestamp: {
     type: Sequelize.DATE,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+    }
   },
   topic: {
     type: Sequelize.STRING(75),
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: true,
+      notEmpty: true,
+      len: [2, 75]
+    }
   },
   body: {
     type: Sequelize.STRING(1000),
-    allowNull: true
+    allowNull: true,
+    validate: {
+      len: [0, 500]
+    }
   }
 }, {
   db,
