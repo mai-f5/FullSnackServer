@@ -13,21 +13,21 @@ const getProjectsThreadsComments = async projectId => {
                         {
                             model: User,
                             as: "user",
-                            attributes: ["id", "username"]
+                            attributes: ["id", "username", "profile_img"]
                         }
                     ],
-                    order: [['timestamp', 'ASC']],
-                    // limit: 20
-
                 },
                 {
                     model: User,
                     as: "user",
-                    attributes: ["id", "username"],
+                    attributes: ["id", "username", "profile_img"],
 
                 }
             ],
-            order: [['timestamp', 'ASC']],
+            order: [
+                ['timestamp', 'DESC'],
+                [{ model: Comment }, 'timestamp', 'ASC']
+            ],
             // limit: 20
         })
 
