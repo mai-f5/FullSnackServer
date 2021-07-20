@@ -5,10 +5,8 @@ const api = require('../DAL/projects');
 const { validateCookie, fileUploads } = require('../utils/middlewares')
 
 // GET
-router.get('/', async function (req, res, next) {
+router.get('/explore', async function (req, res, next) {
     try {
-        if (req.query.userId) req.query.userId = ''
-        console.log(req.query)
         const projectsData = await api.getProjectsCardData(req.query)
         res.send(projectsData)
     } catch (err) {
