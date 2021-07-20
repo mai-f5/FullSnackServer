@@ -38,7 +38,6 @@ const Comment = db.define('comments', {
     validate: {
       notNull: true,
       notEmpty: true,
-      len: [1, 500]
     }
   },
   timestamp: {
