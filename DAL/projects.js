@@ -12,8 +12,7 @@ const getProjectsCardData = async formData => {
             is_visible: 1,
             name: {
                 [Op.like]: `%${formData.search ? formData.search : ''}%`
-            },
-
+            }
         };
 
         if (formData.difflvls) {
@@ -32,15 +31,22 @@ const getProjectsCardData = async formData => {
             }
         }
 
-        // if (formData.reqtechs) {
-        //     whereClause['$project_required_tech_id.id$'] = {
-        //         [Op.in]: formData.reqtechs.split(',')
-        //     }
-        // }
-
-        let reqTechWhere = {}
         if (formData.reqtechs) {
-            reqTechWhere.id = formData.reqtechs.split(',')
+            const reqTechsIdList = formData.reqtechs.split(',')
+            whereClause.id = {
+
+                [Op.in]: [
+                    sequelize.literal(`(SELECT p.id
+             FROM projects p
+             JOIN project_tech relation
+               ON p.id = relation.project_id
+             JOIN required_techs rt
+               ON relation.tech_id =rt.id
+              AND rt.id IN (${[...reqTechsIdList]})
+         GROUP BY p.id
+           HAVING COUNT(*)=${reqTechsIdList.length})`)
+                ]
+            }
         }
 
         if (formData.userId) {
@@ -63,7 +69,6 @@ const getProjectsCardData = async formData => {
                         model: RequiredTech,
                         as: 'project_required_tech_id',
                         attributes: ['id', 'name'],
-                        where: reqTechWhere, ///temp (when filtering by tech, changes the reqtech data in the card as well..)
                     },
                     {
                         model: DifficultyLevel,
@@ -84,7 +89,6 @@ const getProjectsCardData = async formData => {
                 offset: (formData.currentpage - 1) * formData.amount,
                 limit: +formData.amount
             })
-
         return projectsCardsData;
 
     } catch (err) {
@@ -122,7 +126,6 @@ const getProjectData = async projectId => {
                     model: UserLike,
                     as: 'liked_project_id',
                 }
-
             ]
         })
         return projectData;
@@ -182,7 +185,7 @@ const addNewProject = async projectData => {
             user_id: projectData.userId,
             name: projectData.name,
             difficulty_level_id: projectData.difficultyLevel,
-            github_link: projectData.github_link,
+            github_url: projectData.githubLink,
             description: projectData.description,
             assets_src: projectData.assetsSrc,
             timestamp: Date.now()
