@@ -68,7 +68,7 @@ router.post('/login', async function (req, res, next) {
     const match = await bcrypt.compare(password, user.password);
 
     if (match) {
-      res.cookie('fsCookie', JSON.stringify(user.id), { sameSite: true })
+      res.cookie('fsCookie', JSON.stringify(user.id))
       delete user.dataValues['password']
       res.send(user)
     } else {
