@@ -15,7 +15,7 @@ var staticData = require('./routes/staticData');
 
 var app = express();
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://leebaronx3.github.io'],
     credentials: true
 }))
 app.use(logger('dev'));
