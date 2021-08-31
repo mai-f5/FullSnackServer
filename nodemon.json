@@ -1,8 +1,8 @@
 {
     "env": {
-        "DB_USER":"bba3f790e20993",
-        "DB_PASSWORD":"1884065e",
-        "DB_NAME":"heroku_847f2c725e2c4cf",
-        "DB_HOST":"eu-cdbr-west-01.cleardb.com"
+        "DB_USER":"root",
+        "DB_PASSWORD":"Fullsnatch2207",
+        "DB_NAME":"fullsnackdb",
+        "DB_HOST":"localhost"
     }
 }
