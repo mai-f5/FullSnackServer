@@ -14,6 +14,7 @@ var staticData = require('./routes/staticData');
 
 
 var app = express();
+app.enable('trust proxy');
 app.use(cors({
     origin: ['http://localhost:3000', 'https://leebaronx3.github.io'],
     credentials: true

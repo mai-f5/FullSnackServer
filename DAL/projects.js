@@ -191,7 +191,6 @@ const addNewProject = async projectData => {
             timestamp: Date.now()
         })
         projectData.requiredTechnologies.split(',').map(async techId => {
-            console.log(techId)
             await ProjectTech.create({
                 project_id: project.id,
                 tech_id: techId

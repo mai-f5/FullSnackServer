@@ -68,7 +68,7 @@ router.post('/login', async function (req, res, next) {
     const match = await bcrypt.compare(password, user.password);
 
     if (match) {
-      res.cookie('fsCookie', JSON.stringify(user.id), { httpOnly: false, domain: 'https://fullsnack.herokuapp.com' })
+      res.cookie('fsCookie', JSON.stringify(user.id), { domain: 'https://leebaronx3.github.io' })
       delete user.dataValues['password']
       res.send(user)
     } else {
