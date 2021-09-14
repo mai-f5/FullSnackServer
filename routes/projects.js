@@ -34,10 +34,8 @@ router.get('/:projectId', async function (req, res, next) {
 
 router.get('/download/:filename', async function (req, res, next) {
     try {
-        console.log('i do')
         const fileName = req.params.filename;
         var fileLocation = path.join('public/files/', fileName);
-        console.log(fileLocation);
         res.download(fileLocation, fileName);
     } catch (err) {
         console.log(err)

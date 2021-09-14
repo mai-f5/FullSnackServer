@@ -49,17 +49,6 @@ router.put('/password/:userId', validateCookie, async function (req, res, next) 
 
 
 //POST
-router.post('/', async function (req, res, next) {
-  try {
-    const { username, password, email } = req.body
-    const hashedPassword = await bcrypt.hash(password, saltRounds)
-    const newUserId = await api.addNewUser({ username, email, password: hashedPassword })
-    res.send(newUserId)
-
-  } catch (err) {
-    console.log(err)
-  }
-});
 
 router.post('/login', async function (req, res, next) {
   try {
@@ -68,7 +57,7 @@ router.post('/login', async function (req, res, next) {
     const match = await bcrypt.compare(password, user.password);
 
     if (match) {
-      res.cookie('fsCookie', JSON.stringify(user.id), { sameSite: true })
+      res.cookie('fsCookie', JSON.stringify(user.id))
       delete user.dataValues['password']
       res.send(user)
     } else {
@@ -78,5 +67,18 @@ router.post('/login', async function (req, res, next) {
     res.status(403).send('Incorrect Username/Password')
   }
 });
+
+router.post('/', async function (req, res, next) {
+  try {
+    const { username, password, email } = req.body
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    const newUserId = await api.addNewUser({ username, email, password: hashedPassword, domain: 'http://fullsnack-leebaron.site' })
+    res.send(newUserId)
+
+  } catch (err) {
+    console.log(err)
+  }
+});
+
 
 module.exports = router;

@@ -1,0 +1,8 @@
+{
+    "env": {
+        "DB_USER":"root",
+        "DB_PASSWORD":"Fullsnatch2207",
+        "DB_NAME":"fullsnackdb",
+        "DB_HOST":"localhost"
+    }
+}

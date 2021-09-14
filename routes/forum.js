@@ -8,7 +8,6 @@ router.get('/:projectId', async function (req, res, next) {
 
     try {
         const projectsThreadsComments = await api.getProjectsThreadsComments(req.params.projectId)
-        console.log('in route: ', projectsThreadsComments)
         res.send(projectsThreadsComments)
     } catch (err) {
         console.log(err)
