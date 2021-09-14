@@ -72,7 +72,7 @@ router.post('/', async function (req, res, next) {
   try {
     const { username, password, email } = req.body
     const hashedPassword = await bcrypt.hash(password, saltRounds)
-    const newUserId = await api.addNewUser({ username, email, password: hashedPassword })
+    const newUserId = await api.addNewUser({ username, email, password: hashedPassword, domain: 'http://fullsnack-leebaron.site' })
     res.send(newUserId)
 
   } catch (err) {
