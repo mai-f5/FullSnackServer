@@ -49,6 +49,25 @@ router.put('/password/:userId', validateCookie, async function (req, res, next) 
 
 
 //POST
+
+router.post('/login', async function (req, res, next) {
+  try {
+    const { username, password } = req.body
+    const user = await api.login(username);
+    const match = await bcrypt.compare(password, user.password);
+
+    if (match) {
+      res.cookie('fsCookie', JSON.stringify(user.id))
+      delete user.dataValues['password']
+      res.send(user)
+    } else {
+      res.status(403).send('Incorrect Username/Password')
+    }
+  } catch (err) {
+    res.status(403).send('Incorrect Username/Password')
+  }
+});
+
 router.post('/', async function (req, res, next) {
   try {
     const { username, password, email } = req.body
@@ -61,22 +80,5 @@ router.post('/', async function (req, res, next) {
   }
 });
 
-router.post('/login', async function (req, res, next) {
-  try {
-    const { username, password } = req.body
-    const user = await api.login(username);
-    const match = await bcrypt.compare(password, user.password);
-
-    if (match) {
-      res.cookie('fsCookie', JSON.stringify(user.id), { sameSite: "none", secure: true })
-      delete user.dataValues['password']
-      res.send(user)
-    } else {
-      res.status(403).send('Incorrect Username/Password')
-    }
-  } catch (err) {
-    res.status(403).send('Incorrect Username/Password')
-  }
-});
 
 module.exports = router;
