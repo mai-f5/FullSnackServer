@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../DAL/staticData');
+const db_api = require('../DAL/tables');
 
 
 router.get('/requiredtechs', async function (req, res, next) {
@@ -30,5 +31,15 @@ router.get('/occupations', async function (req, res, next) {
     res.send(occupationList)
 });
 
+router.get('/sync-tables', async (req, res) => {
+    try {
+        await db_api.syncDatabase();
+        console.log("trying?")
+        res.status(200).send('Database tables synchronized successfully.');
+    } catch (error) {
+        console.log("failed with error: ",e)
+        res.status(500).send('Error synchronizing database tables.');
+    }
+});
 
 module.exports = router;
