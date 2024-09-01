@@ -26,9 +26,9 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-          platforms: linux/amd64,linuxarm64
-          push: true
-          tags: ${{  secrets.DOCKER_USERNAME  }}/full-snack-server:latest
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{  secrets.DOCKER_USERNAME  }}/full-snack-server:latest
     
     - name: Log out from Docker Hhub
       run: docker logout
